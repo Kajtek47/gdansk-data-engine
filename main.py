@@ -1,19 +1,27 @@
-import requests
+import time
 
-response = requests.get('https://ckan2.multimediagdansk.pl/gpsPositions')
+from src.connection import get_db_connection
+from src.extractor import get_data_from_api
+from src.loader import save_data_to_db
 
-data = response.json()
-print(data.keys())
+def run_pipeline():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    print("Connected to a database")
 
-vehicles_data = data['vehicles']
-print(type(vehicles_data))
+    try:
+        while True:
+            data = get_data_from_api()
+            save_data_to_db(data, cur)
+            conn.commit()
+            print("Data saved to a database")
+            
+            time.sleep(30)
 
-first_vehicle = vehicles_data[0]
-print(first_vehicle)
+    except KeyboardInterrupt:
+        print("Program closing")
+        cur.close()
+        conn.close()
 
-for vehicle in vehicles_data:
-    if (vehicle['routeShortName'] == '199' or vehicle['routeShortName'] == '168'):
-        number = vehicle['routeShortName']
-        delay = vehicle['delay']
-        coordinates = {'latitude':vehicle['lat'], 'longitude':vehicle['lon']}
-        print(f"Line: {number}, delay: {delay}, coordinates: {coordinates['latitude']}, {coordinates['longitude']}")
+if __name__ == "__main__":
+    run_pipeline()
