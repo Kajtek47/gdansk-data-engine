@@ -39,11 +39,13 @@ The pipeline consists of four main stages:
 A powerful visualization tool that offers full control. Users can toggle between:
 * 🔥 **Global View:** See all Buses or all Trams simultaneously to spot city-wide congestion.
 * 🔎 **Granular View:** Filter specific lines (e.g., only "Line 168") to analyze individual routes.
+
 Map Screenshot<img width="1919" height="909" alt="map_details" src="https://github.com/user-attachments/assets/be2f7be3-34ed-4b6b-96fb-a8002e9f0ae7" />
 
 
 ### 2. Delay Trends
 Interactive line charts showing how delays fluctuate for specific vehicles throughout the day, helping to identify peak traffic hours.
+
 Chart Screenshot<img width="1917" height="908" alt="chart_details" src="https://github.com/user-attachments/assets/778e4f81-dfd7-4a8d-b943-7c82d60cf0df" />
 
 
