@@ -5,43 +5,47 @@
 ![Traffic Map Preview](DRAG_AND_DROP_MAP_IMAGE_HERE.png)
 
 ## 🎯 Project Overview
-This project implements an automated **ETL (Extract, Transform, Load)** system that ingests GPS data from public buses every 30 seconds. The goal is to archive historical movement data to identify traffic bottlenecks and analyze schedule adherence for specific bus lines (e.g., 168, 199).
+This project implements an automated **ETL (Extract, Transform, Load)** system that ingests GPS data from **all public transport vehicles** (buses & trams) in Gdańsk every 30 seconds. 
 
-Unlike simple scripts, this solution is built with **scalability and reliability** in mind, utilizing containerization and professional database management.
+The goal is to archive historical movement data to identify city-wide traffic bottlenecks and analyze schedule adherence. The system distinguishes between vehicle types and allows for granular analysis of specific lines versus the entire transport network.
+
+This solution is built with **scalability and reliability** in mind, utilizing containerization and professional database management.
 
 ## 🛠 Tech Stack
 * **Core:** Python 3.10
 * **Database:** PostgreSQL (Dockerized)
 * **Infrastructure:** Docker & Docker Compose
 * **Data Analysis:** Pandas, SQL
-* **Visualization:** Plotly (Interactive Charts), Folium (Geospatial Heatmaps)
+* **Visualization:** Folium (Interactive Layered Maps), Plotly (Charts)
 * **Libraries:** `psycopg2-binary`, `requests`
 
 ## ⚙️ System Architecture
 
 The pipeline consists of four main stages:
 
-1.  **Extract:** A Python daemon connects to the *Open Gdańsk API* to fetch real-time vehicle positions.
-2.  **Transform:** Raw JSON data is filtered (specific lines), validated, and parsed. Timestamps are normalized.
-3.  **Load:** Data is securely inserted into a **PostgreSQL** database running in a Docker container. The system uses parameterized queries to prevent SQL injection.
+1.  **Extract:** A Python daemon connects to the *Open Gdańsk API* to fetch real-time positions of ~500 vehicles.
+2.  **Transform:** Raw JSON data is validated and parsed. Timestamps are normalized.
+3.  **Load:** Data is securely inserted into a **PostgreSQL** database running in a Docker container using optimized batch processing.
 4.  **Analyze:** On-demand scripts generate reports:
-    * `visualizer.py`: Time-series analysis of delays.
-    * `map_generator.py`: Geospatial mapping of traffic congestion.
+    * `visualizer.py`: Time-series analysis of delays for specific vehicles.
+    * `bottlenecks_map.py`: Interactive HTML map with advanced filtering (All Lines vs. Single Line).
 
 ---
 
 ## 📊 Analytics Showcase
 
-### 1. Geospatial Analysis
-Identification of "red zones" where buses frequently experience delays > 5 minutes.
+### 1. Interactive Hybrid Map
+A powerful visualization tool that offers full control. Users can toggle between:
+* 🔥 **Global View:** See all Buses or all Trams simultaneously to spot city-wide congestion.
+* 🔎 **Granular View:** Filter specific lines (e.g., only "Line 168") to analyze individual routes.
 ![Map Screenshot](DRAG_AND_DROP_MAP_IMAGE_HERE.png)
 
 ### 2. Delay Trends
-Interactive line charts showing how delays fluctuate for specific vehicles throughout the day.
+Interactive line charts showing how delays fluctuate for specific vehicles throughout the day, helping to identify peak traffic hours.
 ![Chart Screenshot](DRAG_AND_DROP_CHART_IMAGE_HERE.png)
 
 ### 3. Structured Data Storage
-All data is persisted in a relational database for advanced SQL querying.
+All data is persisted in a relational database, allowing for complex SQL queries across millions of historical records.
 ![Database Screenshot](DRAG_AND_DROP_DB_IMAGE_HERE.png)
 
 ---
@@ -56,7 +60,7 @@ All data is persisted in a relational database for advanced SQL querying.
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/gdansk-data-engine.git](https://github.com/YOUR_USERNAME/gdansk-data-engine.git)
+    git clone https://github.com/Kajtek_47/gdansk-data-engine.git
     cd gdansk-data-engine
     ```
 
@@ -82,11 +86,7 @@ All data is persisted in a relational database for advanced SQL querying.
     # Generate delay chart
     python -m src.visualizer
 
-    # Generate traffic map (HTML file)
+    # Generate interactive map (saves to bottlenecks_map.html)
     python -m src.map_generator
     ```
 
-## 📈 Future Improvements
-* Add a BI dashboard (e.g., Streamlit or Metabase).
-* Implement Airflow for workflow orchestration.
-* Deploy to a cloud provider (AWS/Azure).
