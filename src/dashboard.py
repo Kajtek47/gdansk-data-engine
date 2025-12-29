@@ -48,6 +48,11 @@ data_load_state = st.text("Downloading data...")
 df = load_data()
 data_load_state.text(f"Data downloaded! Number of records: {len(df)}")
 
+# refresh button
+if st.sidebar.button("Refresh page"):
+    st.cache_data.clear()
+    st.rerun()
+
 # choosing line
 st.sidebar.header("Line number")
 all_lines = sorted(df['line_number'].unique())
