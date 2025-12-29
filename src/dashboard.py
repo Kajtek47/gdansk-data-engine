@@ -19,13 +19,6 @@ st.title("Gdańsk Data Engine: Real-Time Traffic Monitor")
 
 def load_data(day, start_hour, end_hour):
     conn = get_db_connection()
-
-    hours_diff = end_hour - start_hour
-
-    if hours_diff > 2:
-        sampling_condition = "AND (EXTRACT(MINUTE FROM created_at)::int %% 5 = 0)"
-    else:
-        sampling_condition =""
     
     query = f"""
         SELECT 
@@ -39,15 +32,25 @@ def load_data(day, start_hour, end_hour):
         WHERE DATE(created_at) = %s
         AND EXTRACT(HOUR FROM created_at) >= %s 
         AND EXTRACT(HOUR FROM created_at) <= %s
-        {sampling_condition}
         ORDER BY created_at DESC;    
     """
 
     try:
         df = pd.read_sql(query, conn, params=(day, start_hour, end_hour))
-        if not df.empty:
-            df['created_at'] = pd.to_datetime(df['created_at'])
+        if df.empty:
+            return df
+        df['created_at'] = pd.to_datetime(df['created_at'])
+        hours_diff = end_hour - start_hour
+
+        if hours_diff > 2:
+            unique_timestamps = df['created_at'].unique()
+            unique_timestamps.sort()
+            unique_timestamps = unique_timestamps[::-1]
+
+            selected_timestamps = unique_timestamps[::5]
+            df = df[df['created_at'].isin(selected_timestamps)]
         return df
+    
     except Exception as e:
         st.error(f"Connection error: {e}")
         return pd.DataFrame()
