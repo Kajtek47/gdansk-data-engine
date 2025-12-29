@@ -5,6 +5,7 @@ import plotly_express as px
 import folium
 from streamlit_folium import st_folium
 from folium.plugins import HeatMap
+import datetime
 
 st.set_page_config(
     page_title="Gdańsk Traffic Dashboard",
@@ -16,10 +17,17 @@ st.title("Gdańsk Data Engine: Real-Time Traffic Monitor")
 
 @st.cache_data(ttl=120)
 
-def load_data():
+def load_data(day, start_hour, end_hour):
     conn = get_db_connection()
 
-    query = """
+    hours_diff = end_hour - start_hour
+
+    if hours_diff > 2:
+        sampling_condition = "AND (EXTRACT(MINUTE FROM created_at)::int %% 5 = 0)"
+    else:
+        sampling_condition =""
+    
+    query = f"""
         SELECT 
             vehicle_id,
             line_number,
@@ -28,13 +36,17 @@ def load_data():
             delay_seconds,
             created_at
         FROM bus_positions
-        WHERE created_at > NOW() - INTERVAL '24 hours'
-        ORDER BY created_at DESC    
+        WHERE DATE(created_at) = %s
+        AND EXTRACT(HOUR FROM created_at) >= %s 
+        AND EXTRACT(HOUR FROM created_at) <= %s
+        {sampling_condition}
+        ORDER BY created_at DESC;    
     """
 
     try:
-        df = pd.read_sql(query, conn)
-        df['created_at'] = pd.to_datetime(df['created_at'])
+        df = pd.read_sql(query, conn, params=(day, start_hour, end_hour))
+        if not df.empty:
+            df['created_at'] = pd.to_datetime(df['created_at'])
         return df
     except Exception as e:
         st.error(f"Connection error: {e}")
@@ -42,16 +54,28 @@ def load_data():
     finally:
         conn.close()
 
-selected_line = 199
-
-data_load_state = st.text("Downloading data...")
-df = load_data()
-data_load_state.text(f"Data downloaded! Number of records: {len(df)}")
+selected_line = 0
 
 # refresh button
 if st.sidebar.button("Refresh page"):
     st.cache_data.clear()
     st.rerun()
+
+# time filters
+st.sidebar.header("Time Filters")
+selected_date = st.sidebar.date_input("Select day", datetime.date.today())
+selected_hours = st.sidebar.slider("Hour range", 0, 23, (0, 23))
+
+start_hour, end_hour = selected_hours
+
+# load data
+data_load_state = st.text("Downloading data...")
+df = load_data(selected_date, start_hour, end_hour)
+data_load_state.text(f"Data downloaded! Number of records: {len(df)}")
+
+if df.empty:
+    st.warning("No data for specified time. Try changing date or hour")
+    st.stop()
 
 # choosing line
 st.sidebar.header("Line number")
