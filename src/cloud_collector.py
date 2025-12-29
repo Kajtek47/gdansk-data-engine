@@ -21,7 +21,7 @@ def fetch_and_save():
     try:
         response = requests.get(url, timeout=10)
         data = response.json()
-        last_update = data['lastUpdateData']
+        last_update = data['lastUpdate']
         vehicles = data['vehicles']
     except Exception as e:
         print(f"API error: {e}")
