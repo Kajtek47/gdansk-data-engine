@@ -16,7 +16,7 @@ def run_pipeline():
             conn.commit()
             print("Data saved to a database")
             
-            time.sleep(30)
+            time.sleep(300)
 
     except KeyboardInterrupt:
         print("Program closing")
