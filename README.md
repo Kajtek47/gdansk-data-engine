@@ -4,7 +4,6 @@
 
 Traffic Map Preview<img width="1918" height="910" alt="map_overview" src="https://github.com/user-attachments/assets/045b9bbf-f929-4acb-b2ad-f08db24fc2ca" />
 
-
 ## 🎯 Project Overview
 This project implements an automated **ETL (Extract, Transform, Load)** system that ingests GPS data from **all public transport vehicles** (buses & trams) in Gdańsk every 30 seconds. 
 
@@ -17,8 +16,8 @@ This solution is built with **scalability and reliability** in mind, utilizing c
 * **Database:** PostgreSQL (Dockerized)
 * **Infrastructure:** Docker & Docker Compose
 * **Data Analysis:** Pandas, SQL
-* **Visualization:** Folium (Interactive Layered Maps), Plotly (Charts)
-* **Libraries:** `psycopg2-binary`, `requests`
+* **Visualization:** Streamlit (Web Dashboard), Folium (Heatmaps & Markers), Plotly (Charts)
+* **Libraries:** `psycopg2-binary`, `requests`, `streamlit-folium`
 
 ## ⚙️ System Architecture
 
@@ -27,27 +26,25 @@ The pipeline consists of four main stages:
 1.  **Extract:** A Python daemon connects to the *Open Gdańsk API* to fetch real-time positions of ~500 vehicles.
 2.  **Transform:** Raw JSON data is validated and parsed. Timestamps are normalized.
 3.  **Load:** Data is securely inserted into a **PostgreSQL** database running in a Docker container using optimized batch processing.
-4.  **Analyze:** On-demand scripts generate reports:
-    * `visualizer.py`: Time-series analysis of delays for specific vehicles.
-    * `bottlenecks_map.py`: Interactive HTML map with advanced filtering (All Lines vs. Single Line).
+4.  **Analyze & Visualize:** A centralized **Streamlit Dashboard** provides real-time analytics, replacing manual script execution. It features:
+    * **KPI Monitors:** Live tracking of active vehicles and average delays.
+    * **Smart Mapping:** Automatically switches between **Heatmaps** (for city-wide overview) and **Detail Markers** (for single-line analysis).
 
 ---
 
 ## 📊 Analytics Showcase
 
 ### 1. Interactive Hybrid Map
-A powerful visualization tool that offers full control. Users can toggle between:
-* 🔥 **Global View:** See all Buses or all Trams simultaneously to spot city-wide congestion.
-* 🔎 **Granular View:** Filter specific lines (e.g., only "Line 168") to analyze individual routes.
+A powerful visualization tool that adapts to the amount of data. Users can toggle between:
+* 🔥 **Global View (Heatmap):** See density of delays across the entire city without clutter.
+* 🔎 **Granular View (Markers):** Select a specific line (e.g., "Line 168") to inspect individual vehicle positions and delay details.
 
 Map Screenshot<img width="1919" height="909" alt="map_details" src="https://github.com/user-attachments/assets/be2f7be3-34ed-4b6b-96fb-a8002e9f0ae7" />
-
 
 ### 2. Delay Trends
 Interactive line charts showing how delays fluctuate for specific vehicles throughout the day, helping to identify peak traffic hours.
 
 Chart Screenshot<img width="1917" height="908" alt="chart_details" src="https://github.com/user-attachments/assets/778e4f81-dfd7-4a8d-b943-7c82d60cf0df" />
-
 
 ### 3. Structured Data Storage
 All data is persisted in a relational database, allowing for complex SQL queries across thousands of historical records.
@@ -64,7 +61,7 @@ All data is persisted in a relational database, allowing for complex SQL queries
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/Kajtek_47/gdansk-data-engine.git
+    git clone [https://github.com/Kajtek_47/gdansk-data-engine.git](https://github.com/Kajtek_47/gdansk-data-engine.git)
     cd gdansk-data-engine
     ```
 
@@ -74,23 +71,34 @@ All data is persisted in a relational database, allowing for complex SQL queries
     docker-compose up -d
     ```
 
-3.  **Install Python dependencies:**
+3.  **Set up Virtual Environment (Recommended):**
+    Create and activate a clean Python environment to avoid conflicts.
+    
+    * **Windows:**
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
+    * **macOS / Linux:**
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
+
+4.  **Install Python dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Run the Pipeline:**
-    Start collecting data in real-time.
+5.  **Run the Pipeline:**
+    Start collecting data in real-time. Keep this terminal open or run in background.
     ```bash
     python main.py
     ```
 
-5.  **Generate Reports (after collecting data):**
+6.  **Launch the Dashboard:**
+    Open a new terminal (remember to activate venv!) and run:
     ```bash
-    # Generate delay chart
-    python -m src.visualizer
-
-    # Generate interactive map (saves to bottlenecks_map.html)
-    python -m src.map_generator
+    streamlit run src/dashboard.py
     ```
-
+    The application will automatically open in your browser at `http://localhost:8501`.
