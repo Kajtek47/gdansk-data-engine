@@ -44,10 +44,9 @@ def load_data(day, start_hour, end_hour):
 
         if hours_diff > 2:
             unique_timestamps = df['created_at'].unique()
-            unique_timestamps.sort()
-            unique_timestamps = unique_timestamps[::-1]
+            sorted_timestamps = sorted(unique_timestamps, reverse=True)
 
-            selected_timestamps = unique_timestamps[::5]
+            selected_timestamps = sorted_timestamps[::5]
             df = df[df['created_at'].isin(selected_timestamps)]
         return df
     
