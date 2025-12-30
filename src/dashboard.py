@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from src.connection import get_db_connection
+from connection import get_db_connection
 import plotly_express as px
 import folium
 from streamlit_folium import st_folium
