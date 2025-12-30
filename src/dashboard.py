@@ -40,14 +40,7 @@ def load_data(day, start_hour, end_hour):
         if df.empty:
             return df
         df['created_at'] = pd.to_datetime(df['created_at'])
-        hours_diff = end_hour - start_hour
-
-        if hours_diff > 2:
-            unique_timestamps = df['created_at'].unique()
-            sorted_timestamps = sorted(unique_timestamps, reverse=True)
-
-            selected_timestamps = sorted_timestamps[::5]
-            df = df[df['created_at'].isin(selected_timestamps)]
+        
         return df
     
     except Exception as e:
@@ -131,7 +124,7 @@ st.subheader("Geospatial Map of delays")
 map_center = [54.3520, 18.6466]
 m = folium.Map(location=map_center, zoom_start=12)
 
-if selected_line == "All lines":
+if selected_line == "All lines" and selected_vehicle == "All vehicles":
     st.info("All lines chosen. Heatmap will be displayed for better readability. (only delayed buses included in the heatmap)")
     heat_data = df_display[df_display['delay_seconds'] > 120]
 
