@@ -46,7 +46,7 @@ start_hour, end_hour = selected_hours
 
 # load data
 data_load_state = st.text("Downloading data...")
-df = load_data(selected_date, start_hour, end_hour)
+df = load_data()
 data_load_state.text(f"Data downloaded! Number of records: {len(df)}")
 
 if df.empty:
