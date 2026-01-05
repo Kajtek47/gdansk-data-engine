@@ -21,9 +21,9 @@ def load_data():
     return df
 
 try:
-    df = load_data()
-    min_date = df['created_at'].min().strftime('%Y-%m-%d')
-    max_date = df['created_at'].max().strftime('%Y-%m-%d')
+    full_df = load_data()
+    min_date = full_df['created_at'].min().strftime('%Y-%m-%d')
+    max_date = full_df['created_at'].max().strftime('%Y-%m-%d')
     st.sidebar.info(f"Data present only for: {min_date} - {max_date}")
     
 except Exception as e:
@@ -46,7 +46,13 @@ start_hour, end_hour = selected_hours
 
 # load data
 data_load_state = st.text("Downloading data...")
-df = load_data()
+mask = (
+    (full_df['created_at'].dt.date == selected_date) &
+    (full_df['created_at'].dt.hour >= start_hour) &
+    (full_df['created_at'].dt.hour <= end_hour)
+)
+
+df = full_df.loc[mask]
 data_load_state.text(f"Data downloaded! Number of records: {len(df)}")
 
 if df.empty:
