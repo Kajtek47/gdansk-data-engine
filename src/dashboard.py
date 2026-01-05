@@ -16,7 +16,7 @@ st.title("Gdańsk Data Engine: Real-Time Traffic Monitor")
 @st.cache_data
 
 def load_data():
-    df = pd.read_parquet("data/gdansk_traffic_history.parquet")
+    df = pd.read_parquet("data/gdansk_traffic_history_cleaned.parquet")
     df['created_at'] = pd.to_datetime(df['created_at'])
     return df
 
@@ -80,6 +80,8 @@ if selected_vehicle != "All vehicles":
     df_display = df_display[df_display["vehicle_id"] == selected_vehicle]
 else:
     df_display = df_display
+
+df_display = df_display.sort_values('created_at')
 
 # KPIs
 average_delay = round(df_display["delay_seconds"].mean(), 2)
