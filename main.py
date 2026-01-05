@@ -1,8 +1,8 @@
 import time
 
-from src.connection import get_db_connection
-from src.extractor import get_data_from_api
-from src.loader import save_data_to_db
+from archive.connection import get_db_connection
+from archive.extractor import get_data_from_api
+from archive.loader import save_data_to_db
 
 def run_pipeline():
     conn = get_db_connection()

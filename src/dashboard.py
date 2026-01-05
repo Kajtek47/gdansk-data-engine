@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from connection import get_db_connection
 import plotly_express as px
 import folium
 from streamlit_folium import st_folium
@@ -9,45 +8,27 @@ import datetime
 
 st.set_page_config(
     page_title="Gdańsk Traffic Dashboard",
-    page_icon="🚌",
     layout="wide"
 )
 
 st.title("Gdańsk Data Engine: Real-Time Traffic Monitor")
 
-@st.cache_data(ttl=120)
+@st.cache_data
 
-def load_data(day, start_hour, end_hour):
-    conn = get_db_connection()
-    
-    query = f"""
-        SELECT 
-            vehicle_id,
-            line_number,
-            latitude,
-            longitude,
-            delay_seconds,
-            created_at
-        FROM bus_positions
-        WHERE DATE(created_at) = %s
-        AND EXTRACT(HOUR FROM created_at) >= %s 
-        AND EXTRACT(HOUR FROM created_at) <= %s
-        ORDER BY created_at DESC;    
-    """
+def load_data():
+    df = pd.read_parquet("data/gdansk_traffic_history.parquet")
+    df['created_at'] = pd.to_datetime(df['created_at'])
+    return df
 
-    try:
-        df = pd.read_sql(query, conn, params=(day, start_hour, end_hour))
-        if df.empty:
-            return df
-        df['created_at'] = pd.to_datetime(df['created_at'])
-        
-        return df
+try:
+    df = load_data()
+    min_date = df['created_at'].min().strftime('%Y-%m-%d')
+    max_date = df['created_at'].max().strftime('%Y-%m-%d')
+    st.sidebar.info(f"Data present only for: {min_date} - {max_date}")
     
-    except Exception as e:
-        st.error(f"Connection error: {e}")
-        return pd.DataFrame()
-    finally:
-        conn.close()
+except Exception as e:
+    st.error(f"Data error: {e}")
+    st.stop()
 
 selected_line = 0
 

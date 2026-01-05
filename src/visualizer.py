@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
-from src.connection import get_db_connection
+from archive.connection import get_db_connection
 import warnings
 
 warnings.filterwarnings('ignore', category=UserWarning)

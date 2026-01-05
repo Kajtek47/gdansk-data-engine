@@ -1,6 +1,6 @@
 import folium
 import pandas as pd
-from src.connection import get_db_connection
+from archive.connection import get_db_connection
 
 def generate_traffic_map():
     print("Downloading data for map creation...")
